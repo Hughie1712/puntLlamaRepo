@@ -34,7 +34,7 @@ jobs:
         run: npm install
 
       - name: Install Chrome for Puppeteer
-        run: npx --yes puppeteer browsers install chrome
+        run: sudo npx --yes puppeteer browsers install chrome
 
       - name: Create Firebase service account key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > serviceAccountKey.json
