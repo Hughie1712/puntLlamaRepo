@@ -1,8 +1,11 @@
 // scrape-AUSjockeys.js
-// Project: puntLlama | Collections: AUSjockeyPremierships
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const puppeteer = require('puppeteer');
+const path = require('path');
+
+// Set Puppeteer to use local cache folder
+process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, '.puppeteer-cache');
 
 const SEASON = '2025-2026';
 
