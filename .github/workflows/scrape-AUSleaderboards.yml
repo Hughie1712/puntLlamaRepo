@@ -2,7 +2,7 @@ name: Scrape AUS Jockeys & Trainers Leaderboards
 
 on:
   schedule:
-    - cron: '0 20 * * *'   # Runs every day at 6:00 AM AEST
+    - cron: '0 20 * * *'   # Runs daily at 6:00 AM AEST
   workflow_dispatch:
 
 jobs:
@@ -19,27 +19,31 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: Install system dependencies
+      - name: Cache Puppeteer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: ${{ runner.os }}-puppeteer-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-puppeteer-
+
+      - name: Install Google Chrome
         run: |
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
-          sudo apt-get install -y \
-            libnss3 \
-            libatk-bridge2.0-0 \
-            libdrm2 \
-            libxkbcommon0 \
-            libgbm1 \
-            libasound2
+          sudo apt-get install -y google-chrome-stable
 
       - name: Install npm dependencies
         run: npm install
-
-      - name: Install Chrome for Puppeteer
-        run: sudo npx --yes puppeteer browsers install chrome
 
       - name: Create Firebase service account key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > serviceAccountKey.json
 
       - name: Run scraper
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
         run: node scrape-AUSall-premierships.js
 
       - name: Clean up service account key
